@@ -116,7 +116,106 @@ This project implements a secure API service using Flask that allows users to su
     ```
     Confirm deployment with `Y` when prompted. Note the `Service URL` provided.
 
-## Testing Deployed Service
+## Testing Deployed Service Examples
+
+The following examples assume the service has been deployed and is accessible at the URL:
+`https://my-first-api-296354555904.us-east4.run.app` (Replace if yours is different).
+
+Examples are provided for PowerShell (`Invoke-WebRequest`) and `curl` (Linux/macOS/Git Bash).
+
+**1. Valid Script:**
+
+*   **PowerShell:**
+    ```powershell
+    Invoke-WebRequest -Uri https://my-first-api-296354555904.us-east4.run.app/execute `
+        -Method POST `
+        -ContentType "application/json" `
+        -Body '{
+                  "script": "import numpy as np\nimport pandas as pd\n\ndef main():\n    print(\"Calculating...\")\n    s = pd.Series([1, 3, 5, np.nan, 6, 8])\n    print(f\"Series length: {len(s)}\")\n    # Convert numpy types for JSON\n    return {\"total\": float(s.sum()), \"count\": int(s.count()) }"
+                }' | ConvertFrom-Json
+    ```
+
+*   **curl:**
+    ```bash
+    curl -X POST https://my-first-api-296354555904.us-east4.run.app/execute \
+         -H "Content-Type: application/json" \
+         -d '{
+               "script": "import numpy as np\nimport pandas as pd\n\ndef main():\n    print(\"Calculating...\")\n    s = pd.Series([1, 3, 5, np.nan, 6, 8])\n    print(f\"Series length: {len(s)}\")\n    # Convert numpy types for JSON\n    return {\"total\": float(s.sum()), \"count\": int(s.count()) }"
+             }' | jq # Optional: Pipe to jq for pretty printing
+    ```
+*Expected Output:* Successful response (200 OK) with `"result": {"total": 23.0, "count": 5}` and `"stdout": "Calculating...\nSeries length: 6\n"`.
+
+**2. Script Without `main` Function:**
+
+*   **PowerShell:**
+    ```powershell
+    Invoke-WebRequest -Uri https://my-first-api-296354555904.us-east4.run.app/execute `
+        -Method POST `
+        -ContentType "application/json" `
+        -Body '{"script": "print(\"This script has no main\")\nx = 1 + 1"}' | ConvertFrom-Json
+    ```
+
+*   **curl:**
+    ```bash
+    curl -X POST https://my-first-api-296354555904.us-east4.run.app/execute \
+         -H "Content-Type: application/json" \
+         -d '{"script": "print(\"This script has no main\")\nx = 1 + 1"}' | jq
+    ```
+*Expected Output:* Error response (400 Bad Request) with message like `"error": "...AttributeError: Script requires a callable 'main' function."` and `"stdout": "This script has no main\n"`.
+
+**3. Script With Syntax Error:**
+
+*   **PowerShell:**
+    ```powershell
+    Invoke-WebRequest -Uri https://my-first-api-296354555904.us-east4.run.app/execute `
+        -Method POST `
+        -ContentType "application/json" `
+        -Body '{"script": "def main():\n  print(\"Hello\")\n  x = 1 + \n  return {\"ok\": True}"}' | ConvertFrom-Json
+    ```
+
+*   **curl:**
+    ```bash
+    curl -X POST https://my-first-api-296354555904.us-east4.run.app/execute \
+         -H "Content-Type: application/json" \
+         -d '{"script": "def main():\n  print(\"Hello\")\n  x = 1 + \n  return {\"ok\": True}"}' | jq
+    ```
+*Expected Output:* Error response (400 Bad Request) with message like `"error": "...SyntaxError: invalid syntax..."` and `"stdout": ""`.
+
+**4. Script Returning Non-JSON Serializable Type:**
+
+*   **PowerShell:**
+    ```powershell
+    Invoke-WebRequest -Uri https://my-first-api-296354555904.us-east4.run.app/execute `
+        -Method POST `
+        -ContentType "application/json" `
+        -Body '{"script": "import numpy as np\ndef main():\n  print(\"Returning ndarray\")\n  # ndarray is not directly JSON serializable\n  return np.array([1,2,3])"}' | ConvertFrom-Json
+    ```
+
+*   **curl:**
+    ```bash
+    curl -X POST https://my-first-api-296354555904.us-east4.run.app/execute \
+         -H "Content-Type: application/json" \
+         -d '{"script": "import numpy as np\ndef main():\n  print(\"Returning ndarray\")\n  # ndarray is not directly JSON serializable\n  return np.array([1,2,3])"}' | jq
+    ```
+*Expected Output:* Error response (400 Bad Request) with message like `"error": "...TypeError: Return value of 'main' is not JSON serializable: Object of type ndarray is not JSON serializable"`, and `"stdout": "Returning ndarray\n"`.
+
+**5. Script That Times Out:** (Timeout set to ~15 seconds)
+
+*   **PowerShell:**
+    ```powershell
+    Invoke-WebRequest -Uri https://my-first-api-296354555904.us-east4.run.app/execute `
+        -Method POST `
+        -ContentType "application/json" `
+        -Body '{"script": "import time\ndef main():\n  print(\"Sleeping...\")\n  time.sleep(20)\n  print(\"Done sleeping\")\n  return {\"status\": \"finished\"}"}' | ConvertFrom-Json
+    ```
+
+*   **curl:**
+    ```bash
+    curl -X POST https://my-first-api-296354555904.us-east4.run.app/execute \
+         -H "Content-Type: application/json" \
+         -d '{"script": "import time\ndef main():\n  print(\"Sleeping...\")\n  time.sleep(20)\n  print(\"Done sleeping\")\n  return {\"status\": \"finished\"}"}' | jq
+    ```
+*Expected Output:* Error response (408 Request Timeout) with message like `"error": "Script execution timed out."`.
 
 *   **Service URL:** `https://my-first-api-296354555904.us-east4.run.app`
 
@@ -138,7 +237,8 @@ This project implements a secure API service using Flask that allows users to su
                "script": "import numpy as np\n\ndef main():\n    print(\"Hello from Cloud Run!\")\n    arr = np.array([1, 2, 3])\n    return {\"sum\": float(arr.sum()), \"mean\": float(arr.mean()) }"
              }' | jq # Optional: Pipe to jq for pretty printing
     ```
-
+    
+    
 ## Available Libraries
 
 User scripts executed via this API have access to:
