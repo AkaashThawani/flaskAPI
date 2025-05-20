@@ -6,13 +6,14 @@ import json
 import sys
 import traceback
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 # Import helpers and config
 from config import *
 from sandbox import run_sandboxed_execution, parse_execution_result
 
 app = Flask(__name__)
-
+CORS(app)
 # --- Flask Routes ---
 
 @app.route('/', methods=['GET'])
