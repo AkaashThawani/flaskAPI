@@ -1,0 +1,49 @@
+$GCP_PROJECT_ID = "flaskapi-458517"
+# $AR_REGION = "us-east4"
+# $AR_REPO_NAME = "flask-apis"
+# $IMAGE_NAME = "basic-flask-api"
+# $IMAGE_TAG = "v1.0" # 
+#
+# $CLOUD_RUN_SERVICE_NAME = "my-first-api"
+# $CLOUD_RUN_REGION = "us-east4"
+
+# --- Step 1: Define Variables in PowerShell (Copy and paste these into your terminal) ---
+# $GCP_PROJECT_ID = "your-actual-project-id"
+# $AR_REGION = "your-actual-ar-region"
+# $AR_REPO_NAME = "your-actual-ar-repo-name"
+# $IMAGE_NAME = "your-actual-image-name"
+# $IMAGE_TAG = "your-new-image-tag-e.g.-v1.3"
+#
+# $CLOUD_RUN_SERVICE_NAME = "your-cloud-run-service-name"
+# $CLOUD_RUN_REGION = "your-cloud-run-region"
+#
+# $FULL_IMAGE_NAME = "$($AR_REGION)-docker.pkg.dev/$($GCP_PROJECT_ID)/$($AR_REPO_NAME)/$($IMAGE_NAME):$($IMAGE_TAG)"
+# Write-Host "Using FULL_IMAGE_NAME: $($FULL_IMAGE_NAME)"
+
+
+# --- Step 2: Build Docker Image (Run from your project's root directory) ---
+# docker build -t $FULL_IMAGE_NAME .
+
+
+# --- Step 3: Authenticate Docker with Artifact Registry (if needed) ---
+# gcloud auth configure-docker "$($AR_REGION)-docker.pkg.dev"
+
+
+# --- Step 4: Push Docker Image to Artifact Registry ---
+# docker push $FULL_IMAGE_NAME
+
+
+# --- Step 5: Deploy to Google Cloud Run ---
+# gcloud run deploy $CLOUD_RUN_SERVICE_NAME `
+#     --image $FULL_IMAGE_NAME `
+#     --region $CLOUD_RUN_REGION `
+#     --platform managed `
+#     --port 8080 `
+#     --allow-unauthenticated `
+#     --execution-environment=gen2 `
+#     --cpu=1 `
+#     --memory=512Mi `
+#     --timeout=300s
+
+# --- Optional: Run Docker Container Locally (if nsjail config allows) ---
+# docker run -p 8080:8080 --rm $FULL_IMAGE_NAME
