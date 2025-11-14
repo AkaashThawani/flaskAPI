@@ -5,6 +5,7 @@ import io
 import contextlib
 import importlib.util
 import os
+import base64
 from config import ( # Import constants
     IS_DOCKER, NSJAIL_PATH, NSJAIL_CFG, EXECUTOR_SCRIPT_PATH,
     SUBPROCESS_TIMEOUT, PYTHON_EXECUTABLE, LD_LIBRARY_PATH

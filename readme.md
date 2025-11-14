@@ -239,13 +239,106 @@ Examples are provided for PowerShell (`Invoke-WebRequest`) and `curl` (Linux/mac
     ```
     
     
+## API Endpoints
+
+### GET /
+Returns service health status.
+
+**Response:**
+```json
+{
+  "status": "ok"
+}
+```
+
+### POST /execute
+Executes Python code and returns the result.
+
+**Request:**
+```json
+{
+  "script": "print('Hello World!')\ndef main():\n    return {'result': 42}"
+}
+```
+
+**Response:**
+```json
+{
+  "stdout": "Hello World!\n",
+  "result": {"result": 42}
+}
+```
+
+### GET /libraries
+Returns information about all available libraries and their categories.
+
+**Response:**
+```json
+{
+  "categories": {
+    "data_science": {
+      "title": "Data Science & Analysis",
+      "libraries": {
+        "pandas": {
+          "import": "import pandas as pd",
+          "example": "df = pd.DataFrame({'x': [1, 2, 3], 'y': [4, 5, 6]})\nprint(df.head())",
+          "description": "Powerful data manipulation and analysis library"
+        }
+      }
+    }
+  },
+  "installed_packages": {...},
+  "total_libraries": 25
+}
+```
+
 ## Available Libraries
 
-User scripts executed via this API have access to:
+User scripts executed via this API have access to **25+ pre-installed libraries** organized by category:
 
-*   Python 3.10 Standard Library (including `os`, `sys`, `json`, etc.)
-*   `pandas`
-*   `numpy`
+### Data Science & Analysis
+- **pandas** - Powerful data manipulation and analysis library
+- **numpy** - Fundamental package for array computing
+- **scipy** - Scientific computing and technical computing
+- **matplotlib** - Comprehensive library for creating static plots
+- **seaborn** - Statistical data visualization based on matplotlib
+- **plotly** - Interactive graphing library for Python
+- **scikit-learn** - Machine learning library for Python
+- **statsmodels** - Statistical models and tests
+- **sympy** - Computer algebra system written in pure Python
+
+### Machine Learning & AI
+- **tensorflow** - Open source machine learning framework
+- **torch** - Tensors and dynamic neural networks in Python
+- **transformers** - State-of-the-art machine learning for NLP
+
+### Data I/O & Databases
+- **openpyxl** - Library to read/write Excel 2010 xlsx/xlsm files
+- **sqlalchemy** - SQL toolkit and Object-Relational Mapping
+- **requests** - Python HTTP library for humans
+
+### Image Processing & Computer Vision
+- **pillow** - Python Imaging Library (PIL) fork
+- **opencv-python** - Open source computer vision library
+
+### Natural Language Processing
+- **nltk** - Natural Language Toolkit for Python
+- **spacy** - Industrial-strength Natural Language Processing
+
+### Web Scraping & APIs
+- **beautifulsoup4** - Library for pulling data out of HTML and XML files
+- **selenium** - Browser automation and testing
+
+### Utilities & Development
+- **tqdm** - Fast, extensible progress bar for Python
+- **jupyter** - Interactive computing and data science
+- **pytest** - Framework for writing and running tests
+- **ipython** - Enhanced interactive Python shell
+- **black** - Python code formatter
+- **flake8** - Python linting tool
+
+### Python Standard Library
+All Python 3.10 standard library modules including: `os`, `sys`, `json`, `math`, `random`, `datetime`, `re`, `collections`, `itertools`, `functools`, etc.
 
 ## Security Considerations
 
