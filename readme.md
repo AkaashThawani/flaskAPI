@@ -340,6 +340,55 @@ User scripts executed via this API have access to **25+ pre-installed libraries*
 ### Python Standard Library
 All Python 3.10 standard library modules including: `os`, `sys`, `json`, `math`, `random`, `datetime`, `re`, `collections`, `itertools`, `functools`, etc.
 
+## CI/CD Deployment
+
+### Automatic Deployment with GitHub Actions
+
+This project includes automatic deployment to Google Cloud Run using GitHub Actions.
+
+#### Setup Instructions
+
+1. **Run the setup script:**
+   ```bash
+   chmod +x setup-gcp-ci-cd.sh
+   ./setup-gcp-ci-cd.sh
+   ```
+
+2. **Create a GitHub repository** and push your code:
+   ```bash
+   git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+   git push -u origin main
+   ```
+
+3. **Add the service account key to GitHub Secrets:**
+   - Go to your GitHub repo → Settings → Secrets and variables → Actions
+   - Create a new secret named: `GCP_SA_KEY`
+   - Copy the entire contents of `github-actions-key.json` and paste it as the secret value
+
+4. **Automatic deployment triggers:**
+   - Any push to `main` or `master` branch
+   - Only when files in `flaskAPI/` directory change
+   - Check the Actions tab in GitHub to monitor deployments
+
+#### Manual Deployment
+
+You can still deploy manually using the existing commands:
+
+```bash
+# Build and push Docker image
+docker build -t us-east4-docker.pkg.dev/flaskapi-458517/flask-apis/my-first-api:v1.x .
+docker push us-east4-docker.pkg.dev/flaskapi-458517/flask-apis/my-first-api:v1.x
+
+# Deploy to Cloud Run
+gcloud run deploy my-first-api \
+  --image us-east4-docker.pkg.dev/flaskapi-458517/flask-apis/my-first-api:v1.x \
+  --region us-east4 \
+  --platform managed \
+  --port 8080 \
+  --allow-unauthenticated \
+  --execution-environment=gen2
+```
+
 ## Security Considerations
 
 *   Code execution is isolated using **nsjail**.
