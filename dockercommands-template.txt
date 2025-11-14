@@ -1,8 +1,20 @@
-$GCP_PROJECT_ID = "flaskapi-458517"
+# ===========================================
+# PYTHON SANDBOX BACKEND - DEPLOYMENT CONFIG
+# ===========================================
+#
+# GCP Project: YOUR_PROJECT_ID (replace with your actual project)
+# Image Name: basic-flask-api:v1.0
+# Repository: flask-apis
+# Region: us-east4
+# Cloud Run Service: my-first-api
+#
+# ===========================================
+
+# $GCP_PROJECT_ID = "your-actual-project-id"
 # $AR_REGION = "us-east4"
 # $AR_REPO_NAME = "flask-apis"
 # $IMAGE_NAME = "basic-flask-api"
-# $IMAGE_TAG = "v1.0" # 
+# $IMAGE_TAG = "v1.0"
 #
 # $CLOUD_RUN_SERVICE_NAME = "my-first-api"
 # $CLOUD_RUN_REGION = "us-east4"

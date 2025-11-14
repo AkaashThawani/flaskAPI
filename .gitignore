@@ -32,6 +32,9 @@ logs/
 # Docker
 .dockerignore
 
+# Deployment configuration (contains sensitive project info)
+dockercommands.txt
+
 # Test files
 test_*.py
 *_test.py
