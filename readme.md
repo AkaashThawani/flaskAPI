@@ -2,6 +2,10 @@
 
 This project implements a secure API service using Flask that allows users to submit arbitrary Python scripts for execution on a server. The service utilizes `nsjail` for sandboxing to ensure safe execution. The result of the script's `main()` function and its standard output are returned to the user.
 
+## Links
+- **Frontend Repository**: [Python Code Sandbox](https://github.com/AkaashThawani/python-sandbox)
+- **Backend Repository**: [Python Code Execution API](https://github.com/AkaashThawani/flaskAPI)
+
 ## Technology Stack
 
 *   Python 3.10
@@ -25,9 +29,8 @@ This project implements a secure API service using Flask that allows users to su
 
 1.  **Clone the repository:**
     ```bash
-    # Assuming you have put the code in a git repo
-    # git clone <your-repo-url>
-    # cd <repo-directory>
+    git clone https://github.com/AkaashThawani/flaskAPI.git
+    cd flaskAPI
     ```
 
 2.  **Build the Docker Image:**
@@ -356,7 +359,7 @@ This project includes automatic deployment to Google Cloud Run using GitHub Acti
 
 2. **Create a GitHub repository** and push your code:
    ```bash
-   git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+   git remote add origin https://github.com/AkaashThawani/flaskAPI.git
    git push -u origin main
    ```
 
