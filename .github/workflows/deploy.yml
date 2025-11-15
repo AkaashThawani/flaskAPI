@@ -1,0 +1,87 @@
+name: Deploy to Google Cloud
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'flaskAPI/**'
+      - '.github/workflows/deploy.yml'
+
+env:
+  GCP_PROJECT: python-sandbox-478302
+  GAR_LOCATION: us-west1
+  SERVICE_NAME: python-sandbox-api
+  REGION: us-west1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Configure Docker
+      run: gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev
+
+    - name: Check if requirements changed
+      id: requirements-check
+      run: |
+        if git diff --name-only HEAD~1 | grep -q "flaskAPI/requirements.txt"; then
+          echo "requirements_changed=true" >> $GITHUB_OUTPUT
+          echo "📦 Requirements changed - building without cache"
+        else
+          echo "requirements_changed=false" >> $GITHUB_OUTPUT
+          echo "📦 Requirements unchanged - using build cache"
+        fi
+
+    - name: Build and push Docker image (fresh build)
+      if: steps.requirements-check.outputs.requirements_changed == 'true'
+      run: |
+        cd flaskAPI
+        echo "🔨 Building fresh (no cache) due to requirements change"
+        docker build --no-cache -t ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/sandbox/${{ env.SERVICE_NAME }}:${{ github.sha }} .
+        docker push ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/sandbox/${{ env.SERVICE_NAME }}:${{ github.sha }}
+
+    - name: Build and push Docker image (with cache)
+      if: steps.requirements-check.outputs.requirements_changed == 'false'
+      run: |
+        cd flaskAPI
+        echo "🚀 Building with cache for faster deployment"
+        docker build -t ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/sandbox/${{ env.SERVICE_NAME }}:${{ github.sha }} .
+        docker push ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/sandbox/${{ env.SERVICE_NAME }}:${{ github.sha }}
+
+    - name: Deploy to Cloud Run
+      run: |
+        gcloud run deploy ${{ env.SERVICE_NAME }} \
+          --image ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/sandbox/${{ env.SERVICE_NAME }}:${{ github.sha }} \
+          --region ${{ env.REGION }} \
+          --platform managed \
+          --port 8080 \
+          --allow-unauthenticated \
+          --execution-environment=gen2 \
+          --memory 2Gi \
+          --cpu 1 \
+          --max-instances 10 \
+          --concurrency 80
+
+    - name: Get service URL
+      run: |
+        SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} --region ${{ env.REGION }} --format 'value(status.url)')
+        echo "🚀 Deployment successful!"
+        echo "Service URL: $SERVICE_URL"
+        echo "SERVICE_URL=$SERVICE_URL" >> $GITHUB_ENV
+
+    - name: Notify deployment
+      run: |
+        echo "✅ Successfully deployed ${{ env.SERVICE_NAME }}"
+        echo "🌐 URL: ${{ env.SERVICE_URL }}"
+        echo "📦 Image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/sandbox/${{ env.SERVICE_NAME }}:${{ github.sha }}"
