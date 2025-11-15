@@ -5,6 +5,7 @@ on:
     branches: [ main, master ]
     paths:
       - 'flaskAPI/**'
+      - '.github/workflows/deploy.yml'
 
 env:
   GCP_PROJECT: python-sandbox-478302
