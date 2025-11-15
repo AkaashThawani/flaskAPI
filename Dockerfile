@@ -24,6 +24,13 @@ RUN make
 # ---- Stage 2: Final Image ----
 FROM python:3.10-slim-bullseye
 
+# Labels for metadata
+LABEL maintainer="Python Sandbox Team" \
+      description="Python Code Execution Sandbox API" \
+      version="latest" \
+      repository="python-sandbox-478302" \
+      org.opencontainers.image.source="https://github.com/your-org/python-sandbox"
+
 WORKDIR /app
 
 # Install runtime dependencies
